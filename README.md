@@ -16,8 +16,42 @@ Work Logger eliminates the common problem of forgetting accomplishments during d
 
 ## Installation
 
+### Manual Installation
+
+1. Clone the repository:
+
 ```bash
-# Installation method will be added once implementation is complete
+git clone https://github.com/niekcandaele/wlog
+cd wlog
+```
+
+2. Make the scripts executable (if not already):
+
+```bash
+chmod +x wlog wreport
+```
+
+3. Add to your PATH by copying to a directory in your PATH or creating symlinks:
+
+```bash
+# Option 1: Copy to /usr/local/bin (requires sudo)
+sudo cp wlog wreport /usr/local/bin/
+
+# Option 2: Copy to ~/.local/bin (user-specific)
+mkdir -p ~/.local/bin
+cp wlog wreport ~/.local/bin/
+# Ensure ~/.local/bin is in your PATH
+
+# Option 3: Create symlinks (replace /path/to/wlog with actual path)
+ln -s /path/to/wlog/wlog ~/.local/bin/wlog
+ln -s /path/to/wlog/wreport ~/.local/bin/wreport
+```
+
+4. Verify installation:
+
+```bash
+wlog "Test message"
+wreport day
 ```
 
 ## Usage
