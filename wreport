@@ -69,7 +69,14 @@ esac
 # Generate list of dates to check
 dates=()
 for ((i=0; i<DAYS; i++)); do
-    date_str=$(date -d "$i days ago" +%Y-%m-%d)
+    # Use cross-platform date command
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS date command
+        date_str=$(date -v-${i}d +%Y-%m-%d)
+    else
+        # GNU date command (Linux)
+        date_str=$(date -d "$i days ago" +%Y-%m-%d)
+    fi
     dates+=("$date_str")
 done
 
@@ -94,7 +101,7 @@ if [ ${#all_entries[@]} -eq 0 ]; then
         echo "No work entries found for the specified period."
     else
         echo "$TITLE"
-        echo "$(printf '=%.0s' $(seq 1 ${#TITLE}))"
+        printf '=%.0s' $(seq 1 ${#TITLE})
         echo
         echo "No work entries found for the specified period."
     fi
@@ -130,7 +137,7 @@ if [ "$FORMAT" = "markdown" ]; then
     }'
 else
     echo "$TITLE"
-    echo "$(printf '=%.0s' $(seq 1 ${#TITLE}))"
+    printf '=%.0s' $(seq 1 ${#TITLE})
     echo
     
     # Sort by timestamp and format for text
