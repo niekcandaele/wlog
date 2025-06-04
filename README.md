@@ -126,7 +126,3 @@ Work Report - Last 24 Hours
 ## Contributing
 
 Contributions are welcome. Please submit issues and pull requests to improve functionality and documentation.
-
-## License
-
-License will be specified upon initial release.
