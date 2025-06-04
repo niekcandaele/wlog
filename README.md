@@ -62,7 +62,7 @@ ln -s /path/to/wlog/wreport ~/.local/bin/wreport
 4. Verify installation:
 
 ```bash
-wlog "Test message"
+wlog Test message
 wreport day
 ```
 
@@ -73,11 +73,11 @@ wreport day
 Log significant work activities throughout your day:
 
 ```bash
-wlog "Helped Joe with cluster configuration"
-wlog "Tested HA failover for onprem cluster"
-wlog "Client call with customer-x regarding SSO integration"
-wlog "Reviewed pull request #247 for authentication module"
-wlog "Deployed hotfix to production environment"
+wlog Helped Joe with cluster configuration
+wlog Tested HA failover for onprem cluster
+wlog Client call with customer-x regarding SSO integration
+wlog Reviewed pull request #247 for authentication module
+wlog Deployed hotfix to production environment
 ```
 
 ### Generating Reports
