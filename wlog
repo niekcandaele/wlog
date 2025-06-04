@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Work Logger - Terminal-based productivity tool for tracking daily work activities
+# Usage: wlog "message"
+
+set -euo pipefail
+
+# Configuration
+WLOG_DIR="${WLOG_DIR:-$HOME/.wlog}"
+DATE=$(date +%Y-%m-%d)
+TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+LOG_FILE="$WLOG_DIR/$DATE.json"
+
+# Create directory if it doesn't exist
+mkdir -p "$WLOG_DIR"
+
+# Check if message is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: wlog \"message\""
+    echo "Example: wlog \"Helped Joe with cluster configuration\""
+    exit 1
+fi
+
+MESSAGE="$1"
+
+# Check if jq is available
+if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is required but not installed. Please install jq to use wlog."
+    echo "On Ubuntu/Debian: sudo apt install jq"
+    echo "On CentOS/RHEL: sudo yum install jq"
+    echo "On macOS: brew install jq"
+    exit 1
+fi
+
+# Create or update the daily log file
+if [ ! -f "$LOG_FILE" ]; then
+    # Create new file with proper structure
+    cat > "$LOG_FILE" << EOF
+{
+  "date": "$DATE",
+  "entries": [
+    {
+      "timestamp": "$TIMESTAMP",
+      "message": "$MESSAGE"
+    }
+  ]
+}
+EOF
+else
+    # Add entry to existing file using jq
+    tmp_file=$(mktemp)
+    jq --arg timestamp "$TIMESTAMP" --arg message "$MESSAGE" \
+       '.entries += [{"timestamp": $timestamp, "message": $message}]' \
+       "$LOG_FILE" > "$tmp_file" && mv "$tmp_file" "$LOG_FILE"
+fi
+
+echo "Logged: $MESSAGE"

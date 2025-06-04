@@ -1,0 +1,157 @@
+#!/bin/bash
+
+# Work Reporter - Generate reports from work log entries
+# Usage: wreport [day|week] [--format=markdown]
+
+set -euo pipefail
+
+# Configuration
+WLOG_DIR="${WLOG_DIR:-$HOME/.wlog}"
+
+# Check if jq is available
+if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is required but not installed. Please install jq to use wreport."
+    echo "On Ubuntu/Debian: sudo apt install jq"
+    echo "On CentOS/RHEL: sudo yum install jq"
+    echo "On macOS: brew install jq"
+    exit 1
+fi
+
+# Parse arguments
+PERIOD=""
+FORMAT="text"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --format=*)
+            FORMAT="${1#*=}"
+            shift
+            ;;
+        day|week)
+            PERIOD="$1"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: wreport [day|week] [--format=markdown]"
+            echo "  day  - Last 24 hours"
+            echo "  week - Last 7 days"
+            echo "  --format=markdown - Export as markdown"
+            exit 1
+            ;;
+    esac
+done
+
+# Check if period is provided
+if [ -z "$PERIOD" ]; then
+    echo "Usage: wreport [day|week] [--format=markdown]"
+    echo "  day  - Last 24 hours"
+    echo "  week - Last 7 days"
+    echo "  --format=markdown - Export as markdown"
+    exit 1
+fi
+
+case "$PERIOD" in
+    "day")
+        TITLE="Work Report - Last 24 Hours"
+        DAYS=1
+        ;;
+    "week")
+        TITLE="Work Report - Last 7 Days"
+        DAYS=7
+        ;;
+    *)
+        echo "Error: Invalid period '$PERIOD'. Use 'day' or 'week'."
+        exit 1
+        ;;
+esac
+
+# Generate list of dates to check
+dates=()
+for ((i=0; i<DAYS; i++)); do
+    date_str=$(date -d "$i days ago" +%Y-%m-%d)
+    dates+=("$date_str")
+done
+
+# Collect all entries from the specified period
+all_entries=()
+
+for date in "${dates[@]}"; do
+    log_file="$WLOG_DIR/$date.json"
+    if [ -f "$log_file" ]; then
+        # Extract entries and add them to our collection
+        while IFS= read -r entry; do
+            all_entries+=("$entry")
+        done < <(jq -c '.entries[]' "$log_file")
+    fi
+done
+
+# Check if we have any entries
+if [ ${#all_entries[@]} -eq 0 ]; then
+    if [ "$FORMAT" = "markdown" ]; then
+        echo "# $TITLE"
+        echo
+        echo "No work entries found for the specified period."
+    else
+        echo "$TITLE"
+        echo "$(printf '=%.0s' $(seq 1 ${#TITLE}))"
+        echo
+        echo "No work entries found for the specified period."
+    fi
+    exit 0
+fi
+
+# Create a temporary file with all entries
+temp_file=$(mktemp)
+printf '%s\n' "${all_entries[@]}" > "$temp_file"
+
+# Sort entries by timestamp and format based on output format
+if [ "$FORMAT" = "markdown" ]; then
+    echo "# $TITLE"
+    echo
+    
+    # Sort by timestamp and format for markdown
+    jq -r '. | "\(.timestamp) - \(.message)"' "$temp_file" | \
+    sort | \
+    sed 's/T/ /' | \
+    sed 's/Z//' | \
+    awk '{
+        # Convert timestamp to readable format
+        timestamp = $1 " " $2
+        gsub(/-/, "/", timestamp)
+        sub(/:[0-9][0-9]$/, "", timestamp)
+        
+        # Print formatted line as markdown list item
+        $1 = ""
+        $2 = ""
+        message = substr($0, 4)  # Remove leading spaces and dashes
+        sub(/^- /, "", message)
+        print "- **" timestamp "** -" message
+    }'
+else
+    echo "$TITLE"
+    echo "$(printf '=%.0s' $(seq 1 ${#TITLE}))"
+    echo
+    
+    # Sort by timestamp and format for text
+    jq -r '. | "\(.timestamp) - \(.message)"' "$temp_file" | \
+    sort | \
+    sed 's/T/ /' | \
+    sed 's/Z//' | \
+    awk '{
+        # Convert timestamp to readable format
+        timestamp = $1 " " $2
+        gsub(/-/, "/", timestamp)
+        sub(/:[0-9][0-9]$/, "", timestamp)
+        
+        # Print formatted line
+        $1 = ""
+        $2 = ""
+        message = substr($0, 4)  # Remove leading spaces and dashes
+        sub(/^- /, "", message)
+        print timestamp " -" message
+    }'
+fi
+
+# Clean up
+rm -f "$temp_file"
