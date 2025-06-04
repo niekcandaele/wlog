@@ -14,10 +14,46 @@ LOG_FILE="$WLOG_DIR/$DATE.json"
 # Create directory if it doesn't exist
 mkdir -p "$WLOG_DIR"
 
+# Check if pop command is being used
+if [ $# -eq 1 ] && [ "$1" = "pop" ]; then
+    # Handle pop functionality
+    if [ ! -f "$LOG_FILE" ]; then
+        echo "No entries found for today to remove."
+        exit 1
+    fi
+    
+    # Check if jq is available
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "Error: jq is required but not installed. Please install jq to use wlog."
+        echo "On Ubuntu/Debian: sudo apt install jq"
+        echo "On CentOS/RHEL: sudo yum install jq"
+        echo "On macOS: brew install jq"
+        exit 1
+    fi
+    
+    # Check if there are any entries to remove
+    entry_count=$(jq '.entries | length' "$LOG_FILE")
+    if [ "$entry_count" -eq 0 ]; then
+        echo "No entries found for today to remove."
+        exit 1
+    fi
+    
+    # Get the last entry before removing it
+    last_entry=$(jq -r '.entries[-1] | "\(.timestamp) - \(.message)"' "$LOG_FILE")
+    
+    # Remove the last entry
+    tmp_file=$(mktemp)
+    jq '.entries |= .[:-1]' "$LOG_FILE" > "$tmp_file" && mv "$tmp_file" "$LOG_FILE"
+    
+    echo "Removed: $last_entry"
+    exit 0
+fi
+
 # Check if message is provided
 if [ $# -eq 0 ]; then
-    echo "Usage: wlog \"message\""
+    echo "Usage: wlog \"message\" or wlog pop"
     echo "Example: wlog \"Helped Joe with cluster configuration\""
+    echo "         wlog pop"
     exit 1
 fi
 
