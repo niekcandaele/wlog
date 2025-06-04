@@ -21,7 +21,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-MESSAGE="$1"
+MESSAGE="$*"
 
 # Check if jq is available
 if ! command -v jq >/dev/null 2>&1; then
