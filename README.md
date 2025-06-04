@@ -80,6 +80,20 @@ wlog Reviewed pull request #247 for authentication module
 wlog Deployed hotfix to production environment
 ```
 
+### Removing Entries
+
+Remove the most recent log entry if you made a mistake:
+
+```bash
+# Remove the latest entry from today's log
+wlog pop
+```
+
+The `pop` command will:
+- Remove the most recently added entry from today's log file
+- Display the removed entry with its timestamp for confirmation
+- Show an error if no entries exist to remove
+
 ### Generating Reports
 
 Retrieve work summaries for different time periods:
