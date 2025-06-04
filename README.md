@@ -16,6 +16,18 @@ Work Logger eliminates the common problem of forgetting accomplishments during d
 
 ## Installation
 
+### Quick Install (One-liner)
+
+```bash
+mkdir -p ~/.local/bin && curl -sSL https://raw.githubusercontent.com/niekcandaele/wlog/main/wlog -o ~/.local/bin/wlog && curl -sSL https://raw.githubusercontent.com/niekcandaele/wlog/main/wreport -o ~/.local/bin/wreport && chmod +x ~/.local/bin/{wlog,wreport} && echo "wlog installed to ~/.local/bin"
+```
+
+Make sure `~/.local/bin` is in your PATH:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
 ### Manual Installation
 
 1. Clone the repository:
@@ -98,14 +110,6 @@ The project includes a comprehensive test suite using the bats testing framework
 ./run_tests.sh
 ```
 
-The test suite covers core functionality including:
-
-- Usage message display
-- Log directory creation
-- JSON file structure validation
-- Entry appending
-- Output confirmation
-
 ## Configuration
 
 The application stores daily JSON files in a configurable directory. Default configuration and customization options will be documented upon implementation.
@@ -142,12 +146,6 @@ Work Report - Last 24 Hours
 2024-06-04 11:42 - Tested HA failover for onprem cluster
 2024-06-04 14:30 - Client call with customer-x regarding SSO integration
 ```
-
-## Roadmap
-
-- [ ] Core logging functionality
-- [ ] Report generation engine
-- [ ] Export capabilities (markdown, CSV)
 
 ## Contributing
 
