@@ -74,3 +74,23 @@ teardown() {
     [ "$status" -eq 0 ]
     [[ "$output" =~ "Logged: Test message" ]]
 }
+
+@test "wlog handles messages with spaces correctly" {
+    run ./wlog "message with multiple spaces"
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "Logged: message with multiple spaces" ]]
+    
+    # Check that the full message is stored in the log file
+    message=$(jq -r '.entries[0].message' "$LOG_FILE")
+    [ "$message" = "message with multiple spaces" ]
+}
+
+@test "wlog handles unquoted multi-word arguments" {
+    run ./wlog testing multiple words
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "Logged: testing multiple words" ]]
+    
+    # Check that all words are captured
+    message=$(jq -r '.entries[0].message' "$LOG_FILE")
+    [ "$message" = "testing multiple words" ]
+}
