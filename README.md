@@ -80,6 +80,32 @@ wreport day
 wreport week
 ```
 
+## Testing
+
+The project includes a comprehensive test suite using the bats testing framework.
+
+### Running Tests
+
+1. Set up the testing framework (one-time setup):
+
+```bash
+./test_setup.sh
+```
+
+2. Run all tests:
+
+```bash
+./run_tests.sh
+```
+
+The test suite covers core functionality including:
+
+- Usage message display
+- Log directory creation
+- JSON file structure validation
+- Entry appending
+- Output confirmation
+
 ## Configuration
 
 The application stores daily JSON files in a configurable directory. Default configuration and customization options will be documented upon implementation.
